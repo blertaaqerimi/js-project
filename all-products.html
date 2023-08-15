@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+    crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="./style.css" />
+
+</head>
+
+<body>
+  <div id="header"></div>
+
+  <div class="album py-5 bg-body-tertiary">
+    <div class="container">
+
+      <div id="container" class="row row-cols-1 row-cols-sm-2 row-cols-md-5 g-3">
+         
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { fetchCart, updateCartBag } from "./helpers/cart.js"
+    import Header from "./components/header.js";
+    import ProductList from "./components/product-list.js";
+    import shopifyClient from "./helpers/shopify-client.js";
+
+    document.getElementById("header").innerHTML = Header();
+    const cart = await fetchCart();
+    updateCartBag(cart);
+
+    try {
+      const products = await shopifyClient.product.fetchAll();
+      console.log({products})
+      const productListHTML = ProductList(products);
+      
+      document.getElementById("container").innerHTML = productListHTML;
+    } catch (err) {
+      console.log({err})
+      document.getElementById("container").innerHTML = "<p style='color: red'>Error fetching products</p>";
+    }
+
+
+  </script>
+</body>
+
+</html>

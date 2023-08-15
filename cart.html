@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+    crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <script src="https://kit.fontawesome.com/39b27d6c8d.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <div id="header">
+  </div>
+
+  <section class="h-100" style="background-color: #eee;">
+    <div class="container h-100 py-5">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-10">
+
+          <div class="card-body p-4">
+
+            <div class="float-end">
+              <p class="mb-0 me-5 d-flex align-items-center">
+                <span class="small text-muted me-2">Order total:</span> <span class="total lead fw-normal">0</span>
+              </p>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h3 class="fw-normal mb-0 text-black">Shopping Cart</h3>
+            </div>
+
+            <div id="items">
+
+            </div>
+
+            <div class="card card-pay">
+              <div class="card-body">
+                <button type="button" id="checkoutBtn" class="pay btn btn-warning btn-block btn-lg">Proceed to Pay</button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+  <script type="module">
+    import Header from "./components/header.js";
+    import { fetchCart, updateCartItem, removeCartItem, updateCartBag } from "./helpers/cart.js";
+    import CartItem from "./components/cart-item.js";
+    import formatPrice from "./helpers/format-price.js";
+
+
+
+    document.querySelector("#header").innerHTML = Header();
+    const cart = await fetchCart();
+    console.log({ cart });
+
+    const setupEventListeners = () => {
+      document.querySelectorAll(".action-buttons").forEach(buttonsDiv => {
+        const increaseBtn = buttonsDiv.querySelector(".increase-btn");
+        const decreaseBtn = buttonsDiv.querySelector(".decrease-btn");
+        const quantity = parseInt(buttonsDiv.querySelector(".qty").textContent);
+        const variantId = buttonsDiv.attributes['variant-id'].value;
+        const deleteBtn = buttonsDiv.parentElement.querySelector(".delete-btn");
+
+        increaseBtn.addEventListener("click", async (e) => {
+          const newCart = await updateCartItem(variantId, quantity + 1);
+          renderCart(newCart);
+        });
+        decreaseBtn.addEventListener("click", async (e) => {
+          const newCart = await updateCartItem(variantId, quantity - 1);
+          renderCart(newCart);
+        });
+
+        deleteBtn.addEventListener("click", async () => {
+          const newCart = await removeCartItem(variantId);
+          renderCart(newCart);
+        });
+      });
+
+    };
+
+    const renderCart = (newCart) => {
+      if (newCart.lineItems?.length > 0) {
+
+        let container = "<div>";
+        newCart.lineItems.forEach(item => {
+          container += CartItem(item);
+        })
+        container += "</div>";
+        document.querySelector("#items").innerHTML = container;
+        document.querySelector(".total").innerHTML = formatPrice(newCart.totalPrice.amount);
+
+        updateCartBag(newCart);
+        setupEventListeners(); // Reattach event listeners after updating the cart
+      }
+      else {document.querySelector("#items").innerHTML = `<div class='card my-3'>
+              <div class='card-body d-flex justify-content-between'>
+                <button type='button' class='btn btn-block btn-lg'><h2 class='text-danger'>Cart is empty!</h2>
+                  </button><a href='./all-products.html' class ='btn btn-success d-flex align-items-center justify-content-center'><h4>Continue shopping</h4></a>
+              </div>
+            </div>`;
+            document.querySelector(".card-pay").style.display = "none";
+          }
+    }
+
+    renderCart(cart);
+
+    document.querySelector(".pay").addEventListener("click", () => {
+        window.location.href = cart.webUrl;
+      });
+
+  </script>
+</body>
+
+</html>

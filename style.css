@@ -1,0 +1,14 @@
+.ellipsis-container {
+    max-height: 400px;
+    /* Adjust this value to your desired maximum height */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bg-img {
+    height: 100vh;
+}
+
+
+

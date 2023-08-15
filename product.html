@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+    crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <script src="https://kit.fontawesome.com/39b27d6c8d.js" crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+  <div id="header"></div>
+  <div id="product-main"></div>
+
+
+  <script type="module">
+    import Header from "./components/header.js";
+    import client from "./helpers/shopify-client.js";
+    import Product from "./components/product.js";
+    import { addCartItem, fetchCart, updateCartBag } from "./helpers/cart.js";
+
+    document.getElementById("header").innerHTML = Header();
+    const cart = await fetchCart();
+    updateCartBag(cart);
+    const urlParams = new URLSearchParams(window.location.search);
+    const productHandle = urlParams.get("handle");
+
+    client.product.fetchByHandle(productHandle).then((product) => {
+
+      if (!product) {
+        document.getElementById("product-main").innerHTML = "<h2 class='text-danger'>Product not found!</h2>";
+        return;
+      }
+      // Do something with the product
+      const productHTML = Product(product);
+      document.getElementById("product-main").innerHTML = productHTML;
+      console.log(product);
+      document.title = product.title;
+
+      document.querySelector("#cart-btn").addEventListener("click", async (e) => {
+        const id = e.target.attributes["variant-id"].value;
+        await addCartItem(id, 1);
+        window.location.href = "/cart.html";
+        document.getElementById("header").innerHTML = Header();
+      })
+    });
+
+
+
+
+  </script>
+</body>
+
+</html>
